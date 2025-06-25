@@ -1,0 +1,29 @@
+{
+  "name": "se_project_express",
+  "version": "0.1.0",
+  "description": "Express project",
+  "keywords": [
+    "Express",
+    "ESLint",
+    "Mongoose",
+    "MongoDB"
+  ],
+  "homepage": "https://github.com/melissa-feeney/se_project_express#readme",
+  "bugs": {
+    "url": "https://github.com/melissa-feeney/se_project_express/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/melissa-feeney/se_project_express.git"
+  },
+  "license": "ISC",
+  "author": "Melissa Feeney",
+  "type": "commonjs",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
