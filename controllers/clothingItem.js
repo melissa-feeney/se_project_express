@@ -1,4 +1,5 @@
 const ClothingItem = require("../models/clothingItem");
+const mongoose = require("mongoose");
 const {
   BAD_REQUEST,
   NOT_FOUND,
@@ -9,29 +10,31 @@ const createItem = (req, res) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
-  ClothingItem.create({ name, weather, imageUrl, owner })
+  return ClothingItem.create({ name, weather, imageUrl, owner })
     .then((item) => {
       console.log("Created item:", item);
-      res.status(201).json(item);
+      return res.status(201).json(item);
     })
     .catch((err) => {
       console.error("POST /items error:", err);
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).json({ message: "Invalid item data" });
       }
-      res
+      return res
         .status(INTERNAL_SERVER_ERROR)
         .json({ message: "Error from createItem" });
     });
 };
 
 const getItems = (req, res) => {
-  ClothingItem.find({})
+  return ClothingItem.find({})
     .then((items) => res.status(200).json(items))
-    .catch((e) => {
-      res.status(BAD_REQUEST).json({ message: "Error from getItems" });
+    .catch((err) => {
+      console.error("GET /items error:", err);
+      return res.status(BAD_REQUEST).json({ message: "Error from getItems" });
     });
 };
+
 const getItemById = (req, res) => {
   const { itemId } = req.params;
 
@@ -39,12 +42,12 @@ const getItemById = (req, res) => {
     return res.status(BAD_REQUEST).json({ message: "Invalid item id" });
   }
 
-  ClothingItem.findById(itemId)
+  return ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
         return res.status(NOT_FOUND).json({ message: "Item not found" });
       }
-      res.status(200).json(item);
+      return res.status(200).json(item);
     })
     .catch((err) => {
       console.error(err);
@@ -58,7 +61,7 @@ const updateItem = (req, res) => {
   const { itemId } = req.params;
   const { imageUrl } = req.body;
 
-  ClothingItem.findByIdAndUpdate(
+  return ClothingItem.findByIdAndUpdate(
     itemId,
     { $set: { imageUrl } },
     { new: true, runValidators: true }
@@ -69,7 +72,7 @@ const updateItem = (req, res) => {
       if (e.name === "DocumentNotFoundError" || e.name === "CastError") {
         return res.status(NOT_FOUND).json({ message: "Item not found" });
       }
-      res.status(BAD_REQUEST).json({ message: "Error from updateItem" });
+      return res.status(BAD_REQUEST).json({ message: "Error from updateItem" });
     });
 };
 
@@ -77,16 +80,17 @@ const deleteItem = (req, res) => {
   const { itemId } = req.params;
   console.log("Deleting item:", itemId);
 
-  ClothingItem.findByIdAndDelete(itemId)
+  return ClothingItem.findByIdAndDelete(itemId)
     .orFail()
     .then(() => res.status(200).json())
     .catch((e) => {
       if (e.name === "CastError") {
         return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
-      } else if (e.name === "DocumentNotFoundError") {
+      }
+      if (e.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).json({ message: "Item not found" });
       }
-      res
+      return res
         .status(INTERNAL_SERVER_ERROR)
         .json({ message: "Error from deleteItem" });
     });
@@ -103,10 +107,13 @@ const likeItem = (req, res) => {
     .catch((err) => {
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
-      } else if (err.name === "DocumentNotFoundError") {
+      }
+      if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).json({ message: "Item not found" });
       }
-      res.status(INTERNAL_SERVER_ERROR).json({ message: "An error has occurred on the server." });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ message: "An error has occurred on the server." });
     });
 };
 
