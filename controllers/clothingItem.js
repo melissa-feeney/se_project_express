@@ -1,5 +1,5 @@
-const ClothingItem = require("../models/clothingItem");
 const mongoose = require("mongoose");
+const ClothingItem = require("../models/clothingItem");
 const {
   BAD_REQUEST,
   NOT_FOUND,
@@ -26,14 +26,15 @@ const createItem = (req, res) => {
     });
 };
 
-const getItems = (req, res) => {
-  return ClothingItem.find({})
+const getItems = (req, res) =>
+  ClothingItem.find({})
     .then((items) => res.status(200).json(items))
     .catch((err) => {
       console.error("GET /items error:", err);
-      return res.status(BAD_REQUEST).json({ message: "Error from getItems" });
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ message: "Error from getItems" });
     });
-};
 
 const getItemById = (req, res) => {
   const { itemId } = req.params;
@@ -57,32 +58,13 @@ const getItemById = (req, res) => {
     });
 };
 
-const updateItem = (req, res) => {
-  const { itemId } = req.params;
-  const { imageUrl } = req.body;
-
-  return ClothingItem.findByIdAndUpdate(
-    itemId,
-    { $set: { imageUrl } },
-    { new: true, runValidators: true }
-  )
-    .orFail()
-    .then((item) => res.status(200).json(item))
-    .catch((e) => {
-      if (e.name === "DocumentNotFoundError" || e.name === "CastError") {
-        return res.status(NOT_FOUND).json({ message: "Item not found" });
-      }
-      return res.status(BAD_REQUEST).json({ message: "Error from updateItem" });
-    });
-};
-
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
   console.log("Deleting item:", itemId);
 
   return ClothingItem.findByIdAndDelete(itemId)
     .orFail()
-    .then(() => res.status(200).json())
+    .then(() => res.status(200).json({ message: "Item successfully deleted" }))
     .catch((e) => {
       if (e.name === "CastError") {
         return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
@@ -128,10 +110,11 @@ const dislikeItem = (req, res) => {
     .catch((err) => {
       if (err.name === "CastError") {
         return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
-      } else if (err.name === "DocumentNotFoundError") {
+      }
+      if (err.name === "DocumentNotFoundError") {
         return res.status(NOT_FOUND).json({ message: "Item not found" });
       }
-      res
+      return res
         .status(INTERNAL_SERVER_ERROR)
         .json({ message: "An error has occurred on the server." });
     });
@@ -141,7 +124,6 @@ module.exports = {
   createItem,
   getItems,
   getItemById,
-  updateItem,
   deleteItem,
   likeItem,
   dislikeItem,
