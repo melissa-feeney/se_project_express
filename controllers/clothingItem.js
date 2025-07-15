@@ -60,17 +60,26 @@ const getItemById = (req, res) => {
 
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
-  console.log("Deleting item:", itemId);
+  const userId = req.user._id;
 
-  return ClothingItem.findByIdAndDelete(itemId)
-    .orFail()
-    .then(() => res.status(200).json({ message: "Item successfully deleted" }))
-    .catch((e) => {
-      if (e.name === "CastError") {
-        return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
-      }
-      if (e.name === "DocumentNotFoundError") {
+  ClothingItem.findById(itemId)
+    .then((item) => {
+      if (!item) {
         return res.status(NOT_FOUND).json({ message: "Item not found" });
+      }
+      if (item.owner.toString() !== req.user._id) {
+        return res
+          .status(403)
+          .json({ message: "You can only delete your own items" });
+      }
+
+      return ClothingItem.findByIdAndDelete(itemId).then(() =>
+        res.status(200).json({ message: "Item successfully deleted" })
+      );
+    })
+    .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
       }
       return res
         .status(INTERNAL_SERVER_ERROR)
