@@ -55,23 +55,20 @@ const createUser = (req, res) => {
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
 
-  return (
-    User.findById(userId)
-      // eslint-disable-next-line arrow-body-style
-      .then((user) => {
-        if (!user) {
-          return res.status(NOT_FOUND).json({ message: "User not found" });
-        }
-        const userObj = user.toObject();
-        return res.status(200).json(userObj);
-      })
-      .catch((err) => {
-        console.error(err);
-        return res
-          .status(INTERNAL_SERVER_ERROR)
-          .json({ message: "An error has occurred on the server." });
-      })
-  );
+  return User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        return res.status(NOT_FOUND).json({ message: "User not found" });
+      }
+      const userObj = user.toObject();
+      return res.status(200).json(userObj);
+    })
+    .catch((err) => {
+      console.error(err);
+      return res
+        .status(INTERNAL_SERVER_ERROR)
+        .json({ message: "An error has occurred on the server." });
+    });
 };
 
 const login = (req, res) => {
