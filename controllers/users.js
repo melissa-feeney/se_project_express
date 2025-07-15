@@ -1,5 +1,4 @@
 const bcrypt = require("bcrypt");
-const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const {
@@ -10,7 +9,7 @@ const {
 
 const { JWT_SECRET } = require("../utils/config");
 
-const getUsers = (req, res) => {
+const getUsers = (req, res) =>
   User.find({})
     .then((users) => res.status(200).json(users))
     .catch((err) => {
@@ -19,10 +18,8 @@ const getUsers = (req, res) => {
         .status(INTERNAL_SERVER_ERROR)
         .json({ message: "An error has occurred on the server" });
     });
-};
 
 const createUser = (req, res) => {
-  console.log("REQ BODY", req.body);
   const { name, avatar, email, password } = req.body;
 
   if (!name || !avatar || !email || !password) {
@@ -31,7 +28,7 @@ const createUser = (req, res) => {
       .json({ message: "These fields are required." });
   }
 
-  bcrypt
+  return bcrypt
     .hash(password, 10)
     .then((hash) => {
       return User.create({ name, avatar, email, password: hash });
@@ -58,20 +55,23 @@ const createUser = (req, res) => {
 const getCurrentUser = (req, res) => {
   const userId = req.user._id;
 
-  User.findById(userId)
-    .then((user) => {
-      if (!user) {
-        return res.status(NOT_FOUND).json({ message: "User not found" });
-      }
-      const userObj = user.toObject();
-      return res.status(200).json(userObj);
-    })
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ message: "An error has occurred on the server." });
-    });
+  return (
+    User.findById(userId)
+      // eslint-disable-next-line arrow-body-style
+      .then((user) => {
+        if (!user) {
+          return res.status(NOT_FOUND).json({ message: "User not found" });
+        }
+        const userObj = user.toObject();
+        return res.status(200).json(userObj);
+      })
+      .catch((err) => {
+        console.error(err);
+        return res
+          .status(INTERNAL_SERVER_ERROR)
+          .json({ message: "An error has occurred on the server." });
+      })
+  );
 };
 
 const login = (req, res) => {
@@ -108,13 +108,13 @@ const updateCurrentUser = (req, res) => {
       if (!user) {
         return res.status(NOT_FOUND).json({ message: "User not found" });
       }
-      res.status(200).json(user);
+      return res.status(200).json(user);
     })
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).json({ message: "Invalid data" });
       }
-      res
+      return res
         .status(INTERNAL_SERVER_ERROR)
         .json({ message: "An error has occurred on the server." });
     });
