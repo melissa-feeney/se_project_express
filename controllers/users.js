@@ -30,9 +30,7 @@ const createUser = (req, res) => {
 
   return bcrypt
     .hash(password, 10)
-    .then((hash) => {
-      return User.create({ name, avatar, email, password: hash });
-    })
+    .then((hash) => User.create({ name, avatar, email, password: hash }))
     .then((user) => {
       const userObj = user.toObject();
       delete userObj.password;
@@ -88,7 +86,7 @@ const login = (req, res) => {
       res.status(200).json({ token });
     })
     .catch(() => {
-      res.status(401).json({ message: "Incorrect email or password" });
+      return res.status(401).json({ message: "Incorrect email or password" });
     });
 };
 
