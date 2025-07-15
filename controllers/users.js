@@ -83,7 +83,7 @@ const login = (req, res) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
         expiresIn: "7d",
       });
-      res.status(200).json({ token });
+      return res.status(200).json({ token });
     })
     .catch(() => {
       return res.status(401).json({ message: "Incorrect email or password" });
@@ -99,6 +99,7 @@ const updateCurrentUser = (req, res) => {
     { name, avatar },
     { new: true, runValidators: true }
   )
+    // eslint-disable-next-line arrow-body-style
     .then((user) => {
       if (!user) {
         return res.status(NOT_FOUND).json({ message: "User not found" });
