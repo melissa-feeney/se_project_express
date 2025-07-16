@@ -3,21 +3,13 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 const {
   BAD_REQUEST,
+  UNAUTHORIZED,
   NOT_FOUND,
+  CONFLICT,
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
 
 const { JWT_SECRET } = require("../utils/config");
-
-const getUsers = (req, res) =>
-  User.find({})
-    .then((users) => res.status(200).json(users))
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ message: "An error has occurred on the server" });
-    });
 
 const createUser = (req, res) => {
   const { name, avatar, email, password } = req.body;
@@ -39,7 +31,7 @@ const createUser = (req, res) => {
     .catch((err) => {
       console.error(err);
       if (err.code === 11000) {
-        return res.status(409).json({ message: "Email already exists" });
+        return res.status(CONFLICT).json({ message: "Email already exists" });
       }
       if (err.name === "ValidationError") {
         return res.status(BAD_REQUEST).json({ message: "Invalid data" });
@@ -63,6 +55,9 @@ const getCurrentUser = (req, res) => {
     })
     .catch((err) => {
       console.error(err);
+      if (err.name === "CastError") {
+        return res.status(BAD_REQUEST).json({ message: "Invalid user ID" });
+      }
       return res
         .status(INTERNAL_SERVER_ERROR)
         .json({ message: "An error has occurred on the server." });
@@ -85,7 +80,9 @@ const login = (req, res) => {
       });
       return res.status(200).json({ token });
     })
-    .catch(() => res.status(401).json({ message: "Incorrect email or password" }));
+    .catch(() =>
+      res.status(UNAUTHORIZED).json({ message: "Incorrect email or password" })
+    );
 };
 
 const updateCurrentUser = (req, res) => {
@@ -115,7 +112,6 @@ const updateCurrentUser = (req, res) => {
 };
 
 module.exports = {
-  getUsers,
   createUser,
   getCurrentUser,
   login,

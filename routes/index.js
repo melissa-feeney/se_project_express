@@ -6,11 +6,11 @@ const auth = require("../middlewares/auth");
 router.post("/signin", login);
 router.post("/signup", createUser);
 
-router.use(auth);
-
 const clothingItem = require("./clothingItem");
 
 router.use("/items", clothingItem);
+
+router.use(auth);
 
 const userRouter = require("./users");
 

@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 const {
   BAD_REQUEST,
+  FORBIDDEN,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
 } = require("../utils/errors");
@@ -36,28 +36,6 @@ const getItems = (req, res) =>
         .json({ message: "Error from getItems" });
     });
 
-const getItemById = (req, res) => {
-  const { itemId } = req.params;
-
-  if (!mongoose.Types.ObjectId.isValid(itemId)) {
-    return res.status(BAD_REQUEST).json({ message: "Invalid item id" });
-  }
-
-  return ClothingItem.findById(itemId)
-    .then((item) => {
-      if (!item) {
-        return res.status(NOT_FOUND).json({ message: "Item not found" });
-      }
-      return res.status(200).json(item);
-    })
-    .catch((err) => {
-      console.error(err);
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ message: "An error has occurred on the server." });
-    });
-};
-
 const deleteItem = (req, res) => {
   const { itemId } = req.params;
 
@@ -68,7 +46,7 @@ const deleteItem = (req, res) => {
       }
       if (item.owner.toString() !== req.user._id) {
         return res
-          .status(403)
+          .status(FORBIDDEN)
           .json({ message: "You can only delete your own items" });
       }
 
@@ -131,7 +109,6 @@ const dislikeItem = (req, res) => {
 module.exports = {
   createItem,
   getItems,
-  getItemById,
   deleteItem,
   likeItem,
   dislikeItem,
