@@ -1,3 +1,5 @@
+DOMAIN NAME: https://wtwr.marcman.eu
+
 # WTWR (What to Wear?): Back End
 
 This back-end project is focused on creating a server for the WTWR application. I gained an understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.
