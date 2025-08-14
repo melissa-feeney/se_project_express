@@ -1,6 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+require("dotenv").config();
+
 const mainRouter = require("./routes/index");
 const { createProxyMiddleware } = require("http-proxy-middleware");
 
@@ -26,6 +28,13 @@ app.use(
 );
 
 app.use("/", mainRouter);
+
+app.use((err, req, res, next) => {
+  console.error(err);
+  return res
+    .status(INTERNAL_SERVER_ERROR)
+    .send({ message: "An error occurred on the server" });
+});
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
