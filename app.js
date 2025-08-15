@@ -4,9 +4,9 @@ const cors = require("cors");
 require("dotenv").config();
 
 const { INTERNAL_SERVER_ERROR } = require("./utils/errors");
-
+const errorHandler = require("./middlewares/error-handler");
 const mainRouter = require("./routes/index");
-// const { createProxyMiddleware } = require("http-proxy-middleware");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -21,29 +21,19 @@ mongoose
 app.use(cors());
 app.use(express.json());
 
+app.use(requestLogger);
+
 app.get("/crash-test", () => {
   setTimeout(() => {
     throw new Error("Server will crash now");
   }, 0);
 });
 
-// app.use(
-//   "/api",
-//   createProxyMiddleware({
-//     target: "http://localhost:3001",
-//     changeOrigin: true,
-//   })
-// );
-
 app.use("/", mainRouter);
 
-app.use((err, req, res, next) => {
-  console.error(err);
-  const { statusCode = 500, message } = err;
-  return res.status(statusCode).send({
-    message: statusCode === 500 ? "An error occurred on the server" : message,
-  });
-});
+app.use(errorLogger);
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
