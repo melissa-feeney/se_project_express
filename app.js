@@ -6,7 +6,7 @@ require("dotenv").config();
 const { INTERNAL_SERVER_ERROR } = require("./utils/errors");
 
 const mainRouter = require("./routes/index");
-const { createProxyMiddleware } = require("http-proxy-middleware");
+// const { createProxyMiddleware } = require("http-proxy-middleware");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -27,21 +27,22 @@ app.get("/crash-test", () => {
   }, 0);
 });
 
-app.use(
-  "/api",
-  createProxyMiddleware({
-    target: "http://localhost:3001",
-    changeOrigin: true,
-  })
-);
+// app.use(
+//   "/api",
+//   createProxyMiddleware({
+//     target: "http://localhost:3001",
+//     changeOrigin: true,
+//   })
+// );
 
 app.use("/", mainRouter);
 
 app.use((err, req, res, next) => {
   console.error(err);
-  return res
-    .status(INTERNAL_SERVER_ERROR)
-    .send({ message: "An error occurred on the server" });
+  const { statusCode = 500, message } = err;
+  return res.status(statusCode).send({
+    message: statusCode === 500 ? "An error occurred on the server" : message,
+  });
 });
 
 app.listen(PORT, () => {

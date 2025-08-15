@@ -1,4 +1,5 @@
 const router = require("express").Router();
+const { celebrate, Joi } = require("celebrate");
 const auth = require("../middlewares/auth");
 
 const {
@@ -11,9 +12,47 @@ const {
 
 router.get("/", getItems);
 
-router.post("/", auth, createItem);
-router.delete("/:itemId", auth, deleteItem);
-router.put("/:itemId/likes", auth, likeItem);
-router.delete("/:itemId/likes", auth, dislikeItem);
+router.post(
+  "/",
+  auth,
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().required().min(2).max(30),
+      weather: Joi.string().valid("hot", "warm", "cold").required(),
+      imageUrl: Joi.string().required().uri(),
+    }),
+  }),
+  createItem
+);
+router.delete(
+  "/:itemId",
+  auth,
+  celebrate({
+    params: Joi.object().keys({
+      itemId: Joi.string().hex().length(24).required(),
+    }),
+  }),
+  deleteItem
+);
+router.put(
+  "/:itemId/likes",
+  auth,
+  celebrate({
+    params: Joi.object().keys({
+      itemId: Joi.string().hex().length(24).required(),
+    }),
+  }),
+  likeItem
+);
+router.delete(
+  "/:itemId/likes",
+  auth,
+  celebrate({
+    params: Joi.object().keys({
+      itemId: Joi.string().hex().length(24).required(),
+    }),
+  }),
+  dislikeItem
+);
 
 module.exports = router;

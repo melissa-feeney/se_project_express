@@ -1,12 +1,12 @@
 const ClothingItem = require("../models/clothingItem");
-const {
-  BAD_REQUEST,
-  FORBIDDEN,
-  NOT_FOUND,
-  INTERNAL_SERVER_ERROR,
-} = require("../utils/errors");
 
-const createItem = (req, res) => {
+const ForbiddenError = require("../errors/forbidden-err");
+const BadRequestError = require("../errors/bad-request-err");
+const NotFoundError = require("../errors/not-found-err");
+const UnauthorizedError = require("../errors/unauthorized-err");
+const ConflictError = require("../errors/conflict-err");
+
+const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
   const owner = req.user._id;
 
@@ -18,53 +18,44 @@ const createItem = (req, res) => {
     .catch((err) => {
       console.error("POST /items error:", err);
       if (err.name === "ValidationError") {
-        return res.status(BAD_REQUEST).json({ message: "Invalid item data" });
+        return next(new BadRequestError("Invalid item data"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ message: "Error from createItem" });
+      return next(err);
     });
 };
 
-const getItems = (req, res) =>
+const getItems = (req, res, next) =>
   ClothingItem.find({})
     .then((items) => res.status(200).json(items))
     .catch((err) => {
       console.error("GET /items error:", err);
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ message: "Error from getItems" });
+      return next(err);
     });
 
-const deleteItem = (req, res) => {
+const deleteItem = (req, res, next) => {
   const { itemId } = req.params;
 
   ClothingItem.findById(itemId)
     .then((item) => {
       if (!item) {
-        return res.status(NOT_FOUND).json({ message: "Item not found" });
+        throw new NotFoundError("Item not found");
       }
       if (item.owner.toString() !== req.user._id) {
-        return res
-          .status(FORBIDDEN)
-          .json({ message: "You can only delete your own items" });
+        throw new ForbiddenError("You can only delete your own items");
       }
 
-      return ClothingItem.findByIdAndDelete(itemId).then(() =>
-        res.status(200).json({ message: "Item successfully deleted" })
-      );
+      return ClothingItem.findByIdAndDelete(itemId);
     })
+    .then(() => res.status(200).json({ message: "Item successfully deleted" }))
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ message: "Error from deleteItem" });
+      return next(err);
     });
 };
 
-const likeItem = (req, res) => {
+const likeItem = (req, res, next) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $addToSet: { likes: req.user._id } },
@@ -74,18 +65,16 @@ const likeItem = (req, res) => {
     .then((item) => res.status(200).json(item))
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID"));
       }
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).json({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
 
-const dislikeItem = (req, res) => {
+const dislikeItem = (req, res, next) => {
   ClothingItem.findByIdAndUpdate(
     req.params.itemId,
     { $pull: { likes: req.user._id } },
@@ -95,14 +84,12 @@ const dislikeItem = (req, res) => {
     .then((item) => res.status(200).json(item))
     .catch((err) => {
       if (err.name === "CastError") {
-        return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+        return next(new BadRequestError("Invalid item ID"));
       }
       if (err.name === "DocumentNotFoundError") {
-        return res.status(NOT_FOUND).json({ message: "Item not found" });
+        return next(new NotFoundError("Item not found"));
       }
-      return res
-        .status(INTERNAL_SERVER_ERROR)
-        .json({ message: "An error has occurred on the server." });
+      return next(err);
     });
 };
 
