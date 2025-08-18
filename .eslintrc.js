@@ -22,5 +22,21 @@ module.exports = {
   rules: {
     "no-console": ["warn", { allow: ["error"] }],
     "no-underscore-dangle": ["error", { allow: ["_id"] }],
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        js: "never",
+        json: "always",
+      },
+    ],
+    "import/no-unresolved": "off", // Optional: disable if you're confident in your paths
+  },
+  settings: {
+    "import/resolver": {
+      node: {
+        extensions: [".js", ".json"],
+      },
+    },
   },
 };

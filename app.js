@@ -1,12 +1,15 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const { errors } = require("celebrate");
 require("dotenv").config();
 
-const { INTERNAL_SERVER_ERROR } = require("./utils/errors");
-const errorHandler = require("./middlewares/error-handler");
-const mainRouter = require("./routes/index");
-const { requestLogger, errorLogger } = require("./middlewares/logger");
+// eslint-disable-next-line import/no-unresolved, import/extensions
+const errorHandler = require("./middlewares/error-handler.js");
+// eslint-disable-next-line import/no-unresolved, import/extensions
+const mainRouter = require("./routes/index.js");
+// eslint-disable-next-line import/no-unresolved, import/extensions
+const { requestLogger, errorLogger } = require("./middlewares/logger.js");
 
 const app = express();
 const { PORT = 3001 } = process.env;
@@ -32,6 +35,8 @@ app.get("/crash-test", () => {
 app.use("/", mainRouter);
 
 app.use(errorLogger);
+
+app.use(errors());
 
 app.use(errorHandler);
 

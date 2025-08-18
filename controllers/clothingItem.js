@@ -3,8 +3,8 @@ const ClothingItem = require("../models/clothingItem");
 const ForbiddenError = require("../errors/forbidden-err");
 const BadRequestError = require("../errors/bad-request-err");
 const NotFoundError = require("../errors/not-found-err");
-const UnauthorizedError = require("../errors/unauthorized-err");
-const ConflictError = require("../errors/conflict-err");
+// const UnauthorizedError = require("../errors/unauthorized-err");
+// const ConflictError = require("../errors/conflict-err");
 
 const createItem = (req, res, next) => {
   const { name, weather, imageUrl } = req.body;
