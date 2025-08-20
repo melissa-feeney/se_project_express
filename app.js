@@ -4,18 +4,15 @@ const cors = require("cors");
 const { errors } = require("celebrate");
 require("dotenv").config();
 
-<<<<<<< HEAD
 const errorHandler = require("./middlewares/error-handler");
 const mainRouter = require("./routes/index");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
-=======
-// eslint-disable-next-line import/no-unresolved, import/extensions
-const errorHandler = require("./middlewares/error-handler.js");
-// eslint-disable-next-line import/no-unresolved, import/extensions
-const mainRouter = require("./routes/index.js");
-// eslint-disable-next-line import/no-unresolved, import/extensions
-const { requestLogger, errorLogger } = require("./middlewares/logger.js");
->>>>>>> 9076512da2700c0b85a951c9b0bec951e7babccf
+
+const errorHandler = require("./middlewares/error-handler");
+
+const mainRouter = require("./routes/index");
+
+const { requestLogger, errorLogger } = require("./middlewares/logger");
 
 const app = express();
 const { PORT = 3001 } = process.env;
